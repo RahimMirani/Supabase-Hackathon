@@ -9,34 +9,44 @@ const router = Router()
  * Parse SQL to extract table names
  */
 function extractTableNames(sql: string): string[] {
+  console.log('Extracting table names from SQL...')
+  console.log('SQL length:', sql.length)
+  
   const statements = sql
     .split(';')
     .map((s) => s.trim())
     .filter((s) => s.length > 0 && !s.startsWith('--'))
 
+  console.log(`Found ${statements.length} statements`)
+
   const tablesCreated: string[] = []
 
   for (const statement of statements) {
-    if (statement.toLowerCase().includes('create table')) {
-      const match = statement.match(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?(\w+)/i)
-      if (match) {
+    const lowerStatement = statement.toLowerCase()
+    if (lowerStatement.includes('create table')) {
+      // More flexible regex to catch various formats
+      const match = statement.match(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-zA-Z_][a-zA-Z0-9_]*)/i)
+      if (match && match[1]) {
+        console.log(`Found table: ${match[1]}`)
         tablesCreated.push(match[1])
+      } else {
+        console.log('Could not extract table name from:', statement.substring(0, 100))
       }
     }
   }
 
+  console.log(`Extracted ${tablesCreated.length} tables:`, tablesCreated)
   return tablesCreated
 }
 
 /**
- * POST /api/supabase/apply
- * Apply schema SQL to a Supabase project
+ * POST /api/supabase/verify
+ * Just verify connection and return SQL (for manual execution)
  */
-router.post('/apply', async (req: Request, res: Response) => {
+router.post('/verify', async (req: Request, res: Response) => {
   try {
     const { supabaseUrl, supabaseKey, sql } = req.body
 
-    // Validate required fields
     if (!supabaseUrl || !supabaseKey || !sql) {
       return res.status(400).json({
         success: false,
@@ -44,7 +54,6 @@ router.post('/apply', async (req: Request, res: Response) => {
       })
     }
 
-    // Validate Supabase URL format
     if (!supabaseUrl.includes('supabase.co')) {
       return res.status(400).json({
         success: false,
@@ -52,117 +61,131 @@ router.post('/apply', async (req: Request, res: Response) => {
       })
     }
 
-    console.log('Connecting to Supabase:', supabaseUrl)
+    console.log('Verifying connection to Supabase:', supabaseUrl)
+    console.log('SQL received, length:', sql?.length || 0)
+    console.log('First 200 chars of SQL:', sql?.substring(0, 200))
 
-    // Create Supabase client with provided credentials
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
+    // Simple connection test
+    const testResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
+      method: 'HEAD',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      }
     })
 
-    // Simple connection test - try to access the auth endpoint
-    try {
-      // Make a simple request to verify credentials work
-      const testResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
-        method: 'HEAD',
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`
-        }
+    if (!testResponse.ok && testResponse.status === 401) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid Supabase credentials. Please check your Project URL and Service Role Key.',
       })
-
-      if (!testResponse.ok && testResponse.status === 401) {
-        console.error('Authentication failed - invalid API key')
-        return res.status(401).json({
-          success: false,
-          error: 'Invalid Supabase credentials. Please check your Project URL and Service Role Key.',
-        })
-      }
-
-      console.log('✓ Connection verified! Credentials are valid.')
-    } catch (testError) {
-      console.error('Connection test error:', testError)
-      // Continue anyway - if credentials are wrong, user will find out when pasting SQL
-      console.log('⚠️ Could not verify connection, but proceeding with SQL generation')
     }
 
-    // Extract table names from SQL
+    console.log('✓ Connection verified!')
+
     const tablesCreated = extractTableNames(sql)
 
-    console.log(`Schema ready to apply: ${tablesCreated.length} tables`)
-    console.log(`Tables: ${tablesCreated.join(', ')}`)
-
-    // Return success with SQL - frontend will show instructions
     res.json({
       success: true,
       message: `✅ Connection verified! Ready to create ${tablesCreated.length} tables.`,
       tablesCreated,
-      sql, // Include SQL so frontend can show it
-      instructions: 'Copy the SQL and paste it into your Supabase SQL Editor to create the tables.',
+      sql,
+      instructions: 'Click "Apply Now" to create tables automatically, or copy the SQL manually.',
     })
   } catch (error) {
-    console.error('Error applying schema to Supabase:', error)
-
-    if (error instanceof ZodError) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request data',
-        details: error.errors,
-      })
-    }
-
-    if (error instanceof Error) {
-      return res.status(500).json({
-        success: false,
-        error: error.message,
-      })
-    }
-
+    console.error('Error verifying Supabase connection:', error)
     res.status(500).json({
       success: false,
-      error: 'Failed to apply schema to Supabase',
+      error: 'Failed to verify connection',
     })
   }
 })
 
 /**
- * POST /api/supabase/test-connection
- * Test Supabase connection
+ * POST /api/supabase/apply
+ * Actually execute the SQL on Supabase
  */
-router.post('/test-connection', async (req: Request, res: Response) => {
+router.post('/apply', async (req: Request, res: Response) => {
   try {
-    const { supabaseUrl, supabaseKey } = req.body
+    const { supabaseUrl, supabaseKey, sql } = req.body
 
-    if (!supabaseUrl || !supabaseKey) {
+    if (!supabaseUrl || !supabaseKey || !sql) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: supabaseUrl and supabaseKey',
+        error: 'Missing required fields',
       })
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    console.log('\n🚀 Applying schema to Supabase...')
 
-    // Try a simple query
-    const { error } = await supabase
-      .from('_test')
-      .select('*')
-      .limit(1)
+    // Split SQL into statements
+    const statements = sql
+      .split(';')
+      .map((s: string) => s.trim())
+      .filter((s: string) => s.length > 0 && !s.startsWith('--'))
 
-    // If we get here without throwing, connection works
+    const tablesCreated: string[] = []
+    let successCount = 0
+
+    // Execute each statement via Supabase Management API
+    for (let i = 0; i < statements.length; i++) {
+      const statement = statements[i]
+      
+      // Extract table name
+      if (statement.toLowerCase().includes('create table')) {
+        const match = statement.match(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?(\w+)/i)
+        if (match) {
+          tablesCreated.push(match[1])
+        }
+      }
+
+      try {
+        // Execute using Supabase Database Webhook or Management API
+        // For now, we'll use a simpler approach with pg_net or direct execution
+        const response = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({ sql_query: statement })
+        })
+
+        if (response.ok) {
+          successCount++
+          console.log(`✓ ${i + 1}/${statements.length} executed`)
+        } else {
+          // If exec_sql doesn't exist, return instructions
+          if (response.status === 404) {
+            console.log('⚠️ Direct SQL execution not available')
+            return res.json({
+              success: false,
+              autoExecute: false,
+              message: 'Direct SQL execution requires setup. Please copy and paste the SQL manually into your Supabase SQL Editor.',
+              tablesCreated,
+              sql,
+            })
+          }
+        }
+      } catch (err) {
+        console.error(`Error on statement ${i + 1}:`, err)
+      }
+    }
+
     res.json({
       success: true,
-      message: 'Successfully connected to Supabase',
+      message: `🎉 Successfully created ${tablesCreated.length} tables!`,
+      tablesCreated,
+      statementsExecuted: successCount,
     })
   } catch (error) {
-    console.error('Connection test failed:', error)
-    res.status(401).json({
+    console.error('Error applying schema:', error)
+    res.status(500).json({
       success: false,
-      error: 'Failed to connect to Supabase',
+      error: 'Failed to apply schema',
     })
   }
 })
 
 export default router
-

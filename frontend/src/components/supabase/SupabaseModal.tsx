@@ -7,18 +7,27 @@ type SupabaseModalProps = {
     sql: string
     tablesCreated: string[]
     instructions: string
+    credentials: { url: string; serviceKey: string }
+  }>
+  onApplyNow: (credentials: { url: string; serviceKey: string }, sql: string) => Promise<{
+    success: boolean
+    message: string
+    tablesCreated: string[]
   }>
 }
 
-export const SupabaseModal = ({ isOpen, onClose, onConnect }: SupabaseModalProps) => {
+export const SupabaseModal = ({ isOpen, onClose, onConnect, onApplyNow }: SupabaseModalProps) => {
   const [url, setUrl] = useState('')
   const [serviceKey, setServiceKey] = useState('')
   const [isConnecting, setIsConnecting] = useState(false)
+  const [isApplying, setIsApplying] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [showFinalSuccess, setShowFinalSuccess] = useState(false)
   const [successData, setSuccessData] = useState<{
     sql: string
     tablesCreated: string[]
+    credentials: { url: string; serviceKey: string }
   } | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,6 +47,7 @@ export const SupabaseModal = ({ isOpen, onClose, onConnect }: SupabaseModalProps
       setSuccessData({
         sql: result.sql,
         tablesCreated: result.tablesCreated,
+        credentials: result.credentials,
       })
       setShowSuccess(true)
     } catch (err) {
@@ -47,26 +57,44 @@ export const SupabaseModal = ({ isOpen, onClose, onConnect }: SupabaseModalProps
     }
   }
 
-  const handleCopySql = async () => {
-    if (successData?.sql) {
-      await navigator.clipboard.writeText(successData.sql)
-      alert('SQL copied to clipboard!')
+  const handleApplyNow = async () => {
+    if (!successData) return
+
+    setIsApplying(true)
+    setError(null)
+
+    try {
+      const result = await onApplyNow(successData.credentials, successData.sql)
+      
+      if (result.success) {
+        // Show final success
+        setShowFinalSuccess(true)
+      } else {
+        // Auto-execute not available, show message
+        alert(result.message + '\n\nPlease copy the SQL and paste it into your Supabase SQL Editor.')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to apply schema')
+      alert('Failed to apply schema automatically. Please copy the SQL and paste it manually.')
+    } finally {
+      setIsApplying(false)
     }
   }
 
-  const handleOpenSqlEditor = () => {
-    if (url) {
-      const projectUrl = url.replace('https://', '').replace('.supabase.co', '')
-      window.open(`https://supabase.com/dashboard/project/${projectUrl}/editor/sql`, '_blank')
+  const handleCopySql = async () => {
+    if (successData?.sql) {
+      await navigator.clipboard.writeText(successData.sql)
+      alert('✓ SQL copied to clipboard!')
     }
   }
 
   const handleClose = () => {
-    if (!isConnecting) {
+    if (!isConnecting && !isApplying) {
       setUrl('')
       setServiceKey('')
       setError(null)
       setShowSuccess(false)
+      setShowFinalSuccess(false)
       setSuccessData(null)
       onClose()
     }
@@ -74,7 +102,55 @@ export const SupabaseModal = ({ isOpen, onClose, onConnect }: SupabaseModalProps
 
   if (!isOpen) return null
 
-  // Success view
+  // Final success view - tables created!
+  if (showFinalSuccess && successData) {
+    return (
+      <div className="modal-overlay" onClick={handleClose}>
+        <div className="modal-content modal-content--success" onClick={(e) => e.stopPropagation()}>
+          <header className="modal-header">
+            <div>
+              <h2 className="modal-title">🎉 Tables Created!</h2>
+              <p className="modal-subtitle">
+                Successfully created {successData.tablesCreated.length} tables in Supabase!
+              </p>
+            </div>
+            <button className="modal-close" onClick={handleClose} type="button" aria-label="Close">
+              ×
+            </button>
+          </header>
+
+          <div className="modal-body">
+            <div className="success-content">
+              <div className="success-tables">
+                <h3>✓ Tables created:</h3>
+                <div className="success-tables-list">
+                  {successData.tablesCreated.map((table) => (
+                    <span key={table} className="success-table-badge">
+                      {table}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="success-instructions">
+                <p style={{ fontSize: '1.1rem', color: '#3ECF8E', fontWeight: 600 }}>
+                  🚀 Your database is ready! Check your Supabase dashboard.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <footer className="modal-footer">
+            <button className="btn" onClick={handleClose} type="button">
+              Done
+            </button>
+          </footer>
+        </div>
+      </div>
+    )
+  }
+
+  // Success view - ready to apply
   if (showSuccess && successData) {
     return (
       <div className="modal-overlay" onClick={handleClose}>
@@ -121,14 +197,14 @@ export const SupabaseModal = ({ isOpen, onClose, onConnect }: SupabaseModalProps
           </div>
 
           <footer className="modal-footer">
-            <button className="btn btn--ghost" onClick={handleClose} type="button">
-              Done
+            <button className="btn btn--ghost" onClick={handleClose} type="button" disabled={isApplying}>
+              Cancel
             </button>
-            <button className="btn btn--ghost" onClick={handleOpenSqlEditor} type="button">
-              Open SQL Editor →
-            </button>
-            <button className="btn" onClick={handleCopySql} type="button">
+            <button className="btn btn--ghost" onClick={handleCopySql} type="button" disabled={isApplying}>
               📋 Copy SQL
+            </button>
+            <button className="btn" onClick={handleApplyNow} type="button" disabled={isApplying}>
+              {isApplying ? '🔄 Creating Tables...' : '🚀 Apply Now (Auto-Create)'}
             </button>
           </footer>
         </div>

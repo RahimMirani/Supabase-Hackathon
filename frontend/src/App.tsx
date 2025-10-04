@@ -4,7 +4,7 @@ import { SchemaView } from './components/schema'
 import { SqlModal } from './components/sql'
 import { SupabaseModal } from './components/supabase'
 import { StoreProvider, useStore } from './state'
-import { applyToSupabase } from './services/apiService'
+import { verifySupabaseConnection, applySchemaToSupabase } from './services/apiService'
 import { generateSqlFromSchema } from './utils/sqlGenerator'
 import './App.css'
 
@@ -38,15 +38,22 @@ const AppContent = () => {
     // Generate SQL from schema
     const sql = generateSqlFromSchema(schema)
 
-    // Apply to Supabase (verifies connection and returns SQL)
-    const result = await applyToSupabase(credentials.url, credentials.serviceKey, sql)
+    // Verify connection first
+    const result = await verifySupabaseConnection(credentials.url, credentials.serviceKey, sql)
 
-    // Return data for success modal
+    // Return data for success modal (including credentials for auto-apply)
     return {
-      sql,
-      tablesCreated: schema.tables.map((t) => t.name),
+      sql: result.sql,
+      tablesCreated: result.tablesCreated,
       instructions: result.message,
+      credentials, // Pass credentials for "Apply Now" button
     }
+  }
+
+  const handleApplyNow = async (credentials: { url: string; serviceKey: string }, sql: string) => {
+    // Execute SQL automatically
+    const result = await applySchemaToSupabase(credentials.url, credentials.serviceKey, sql)
+    return result
   }
 
   return (
@@ -72,6 +79,7 @@ const AppContent = () => {
             isOpen={showSupabaseConnectModal} 
             onClose={handleCloseSupabaseModal}
             onConnect={handleSupabaseConnect}
+            onApplyNow={handleApplyNow}
           />
         </>
       )}
