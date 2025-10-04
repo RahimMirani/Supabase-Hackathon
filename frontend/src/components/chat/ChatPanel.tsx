@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { mockChatResponse } from '../../services/mockChatService'
+import { generateSchema, ApiError } from '../../services/apiService'
 import { useStore } from '../../state'
 import type { ChatMessage } from '../../state'
 
@@ -18,6 +18,8 @@ export const ChatPanel = () => {
   const addChatMessage = useStore((state) => state.addChatMessage)
   const patchChat = useStore((state) => state.patchChat)
   const patchPrompt = useStore((state) => state.patchPrompt)
+  const setSchemaData = useStore((state) => state.setSchemaData)
+  const patchAsyncState = useStore((state) => state.patchAsyncState)
 
   const [input, setInput] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -40,20 +42,51 @@ export const ChatPanel = () => {
     }
 
     patchChat({ isLoading: true, error: null })
+    patchAsyncState({ isGeneratingSchema: true })
     addChatMessage(userMessage)
     setInput('')
+    setError(null)
 
     try {
-      const aiMessage = await mockChatResponse(content)
+      // Call real backend API to generate schema
+      const schema = await generateSchema(content)
+      
+      // Update schema state
+      setSchemaData(schema)
+      
+      // Add success AI message
+      const aiMessage: ChatMessage = {
+        id: `msg-ai-${Date.now()}`,
+        role: 'ai',
+        content: `I've generated a database schema with ${schema.tables.length} tables and ${schema.relations.length} relationships. Check out the ERD on the right! You can view the SQL or connect to Supabase when ready.`,
+        createdAt: new Date().toISOString(),
+      }
       addChatMessage(aiMessage)
       patchPrompt({ current: content, lastSubmitted: content, isDirty: false })
     } catch (err) {
-      setError('Failed to reach assistant. Please try again.')
-      patchChat({ error: 'Mock assistant failed.' })
+      console.error('Error generating schema:', err)
+      
+      let errorMessage = 'Failed to generate schema. Please try again.'
+      if (err instanceof ApiError) {
+        errorMessage = err.message
+      }
+      
+      setError(errorMessage)
+      patchChat({ error: errorMessage })
+      
+      // Add error AI message
+      const errorAiMessage: ChatMessage = {
+        id: `msg-ai-${Date.now()}`,
+        role: 'ai',
+        content: `Sorry, I encountered an error: ${errorMessage}`,
+        createdAt: new Date().toISOString(),
+      }
+      addChatMessage(errorAiMessage)
     } finally {
       patchChat({ isLoading: false })
+      patchAsyncState({ isGeneratingSchema: false })
     }
-  }, [addChatMessage, canSend, input, patchChat, patchPrompt])
+  }, [addChatMessage, canSend, input, patchChat, patchPrompt, setSchemaData, patchAsyncState])
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLTextAreaElement>) => {

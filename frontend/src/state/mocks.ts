@@ -1,6 +1,9 @@
-import type { AppState, ChatMessage, SchemaData, StepKey } from './types'
+import type { AppState, StepKey } from './types'
 
-const mockMessages: ChatMessage[] = [
+// Keeping mock data for reference - currently unused
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/*
+const mockMessages = [
   {
     id: 'msg-1',
     role: 'user',
@@ -17,7 +20,7 @@ const mockMessages: ChatMessage[] = [
   },
 ]
 
-const mockSchema: SchemaData = {
+const mockSchema = {
   tables: [
     {
       id: 'tbl-users',
@@ -169,28 +172,30 @@ const mockSchema: SchemaData = {
   ],
 }
 
-const mockSql = `-- Projects app schema\n\ncreate table public.users (\n  id uuid primary key default gen_random_uuid(),\n  email text not null unique,\n  full_name text not null,\n  created_at timestamptz default now()\n);\n\ncreate table public.projects (\n  id uuid primary key default gen_random_uuid(),\n  owner_id uuid not null references public.users(id),\n  name text not null,\n  status text check (status in ('draft','active','archived')),\n  created_at timestamptz default now()\n);\n\ncreate table public.tasks (\n  id uuid primary key default gen_random_uuid(),\n  project_id uuid not null references public.projects(id),\n  assignee_id uuid references public.users(id),\n  title text not null,\n  status text default 'todo' check (status in ('todo','in_progress','done')),\n  due_date date\n);\n`
+const mockSql = `-- Projects app schema...`
+*/
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 const defaultSequence: StepKey[] = ['prompt', 'schema', 'sql', 'apply']
 
 export const buildInitialState = (): AppState => ({
   chat: {
-    messages: mockMessages,
+    messages: [],
     isLoading: false,
     error: null,
   },
   prompt: {
-    current: mockMessages[0]?.content ?? '',
-    lastSubmitted: mockMessages[0]?.content ?? null,
+    current: '',
+    lastSubmitted: null,
     isDirty: false,
   },
   schema: {
-    data: mockSchema,
+    data: null,
     hasEdits: false,
-    updatedAt: new Date().toISOString(),
+    updatedAt: null,
   },
   sql: {
-    text: mockSql,
+    text: '',
     filename: 'schema.sql',
     hasEdits: false,
   },
