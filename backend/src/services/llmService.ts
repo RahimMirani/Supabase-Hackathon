@@ -1,9 +1,20 @@
 import OpenAI from 'openai'
 import { SchemaData, SchemaDataSchema } from '../types/schema'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Lazy-initialize OpenAI client to ensure env vars are loaded
+let openaiClient: OpenAI | null = null
+
+function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY is not configured. Please add it to your .env file.')
+    }
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  }
+  return openaiClient
+}
 
 const SYSTEM_PROMPT = `You are an expert database architect specializing in PostgreSQL schema design for Supabase.
 
@@ -67,6 +78,7 @@ Be thorough and thoughtful. Consider data integrity, performance, and scalabilit
 
 export async function generateSchemaFromPrompt(prompt: string): Promise<SchemaData> {
   try {
+    const openai = getOpenAIClient()
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
@@ -105,6 +117,7 @@ export async function refineSchema(
   refinementPrompt: string
 ): Promise<SchemaData> {
   try {
+    const openai = getOpenAIClient()
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
