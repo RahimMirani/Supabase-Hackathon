@@ -106,12 +106,20 @@ const generateTableConstraints = (table: SchemaTable, schema: SchemaData): strin
   // Check constraints from column descriptions (e.g., "draft | active | archived")
   table.columns.forEach((col) => {
     if (col.description && col.description.includes('|')) {
-      const values = col.description.split('|').map(v => v.trim())
-      const checkName = `check_${table.name}_${col.name}`
-      const valuesList = values.map(v => `'${v}'`).join(', ')
-      constraints.push(
-        `CONSTRAINT ${checkName} CHECK (${col.name} IN (${valuesList}))`
-      )
+      // Clean up values: remove quotes, trim whitespace
+      const values = col.description
+        .split('|')
+        .map(v => v.trim())
+        .map(v => v.replace(/^['"]|['"]$/g, '')) // Remove leading/trailing quotes
+        .filter(v => v.length > 0)
+      
+      if (values.length > 0) {
+        const checkName = `check_${table.name}_${col.name}`
+        const valuesList = values.map(v => `'${v}'`).join(', ')
+        constraints.push(
+          `CONSTRAINT ${checkName} CHECK (${col.name} IN (${valuesList}))`
+        )
+      }
     }
   })
   

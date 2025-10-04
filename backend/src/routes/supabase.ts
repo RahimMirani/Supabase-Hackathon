@@ -154,16 +154,19 @@ router.post('/apply', async (req: Request, res: Response) => {
             'apikey': supabaseKey,
             'Authorization': `Bearer ${supabaseKey}`,
           },
-          body: JSON.stringify({ sql_query: statement })
+          body: JSON.stringify({ query: statement })
         })
 
         if (response.ok) {
           successCount++
           console.log(`✓ ${i + 1}/${statements.length} executed`)
         } else {
+          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
+          console.log(`❌ Statement ${i + 1} failed:`, response.status, errorData)
+          
           // If exec_sql doesn't exist, return instructions
           if (response.status === 404) {
-            console.log('⚠️ Direct SQL execution not available')
+            console.log('⚠️ Direct SQL execution not available - exec_sql function not found')
             return res.json({
               success: false,
               autoExecute: false,
