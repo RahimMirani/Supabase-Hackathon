@@ -11,32 +11,78 @@ What it does:
 
 Steps:
 
-- Phase 1 - Frontend First (~2 hrs)
-  - Scaffold Vite UI, add global state, ensure layout works with placeholder data.
-  - Deliverable: fully wired frontend experience using mock data, ready for real APIs.
+- Phase 1 - Frontend First (~2 hrs) ✅ COMPLETE
+  - Scaffold Vite UI with Supabase theme (dark + green accents)
+  - Add global state management (Zustand)
+  - Build chat panel interface with mock responses
+  - Create Mermaid ERD visualization component
+  - Implement SQL generation from schema JSON
+  - Build SQL modal with copy/download functionality
+  - Deliverable: Fully polished frontend with mock data, ready for real APIs
 
-- Phase 2 - Backend API & LLM (~2.5 hrs)
-  - Set up Node/Express backend with env config and CORS.
-  - Implement `POST /schema/generate` and `POST /schema/sql` with validation and temporary stub logic.
-  - Integrate frontend calls to these endpoints; handle loading/errors cleanly.
-  - Deliverable: prompt produces and displays schema/SQL from backend (stubbed if needed).
+- Phase 2 - Backend API & LLM Integration (~2.5 hrs) 🔨 IN PROGRESS
+  - Backend Setup (30 mins):
+    - Create Express/TypeScript backend with CORS
+    - Install dependencies (OpenAI/Anthropic SDK, Zod, dotenv)
+    - Setup folder structure (routes, services, types)
+  - LLM Integration (1 hour):
+    - Configure OpenAI/Anthropic API
+    - Write system prompt for schema generation
+    - Parse LLM JSON response with error handling
+  - API Endpoints (1 hour):
+    - POST /api/schema/generate (natural language → schema JSON)
+    - POST /api/schema/sql (schema JSON → SQL)
+    - Add Zod validation middleware
+  - Frontend Integration (30 mins):
+    - Create API service layer
+    - Update ChatPanel to call real backend
+    - Add loading/error states
+  - Deliverable: Working AI schema generation from user prompts
 
-- Phase 3 - Schema Logic & Visualization (~2 hrs)
-  - Finalize shared JSON schema contract (tables, columns, relations) using zod types.
-  - Render real Mermaid ERD from schema JSON; enable edits that update state and re-render.
-  - Deliverable: accurate, editable ERD reflecting live schema data.
+- Phase 3 - Schema Editing & Polish (~1 hour)
+  - Add inline editing capabilities (optional):
+    - Edit table/column names
+    - Add/remove columns
+    - Modify relationships
+  - Schema regeneration with AI refinement
+  - Keep chat history for context
+  - Deliverable: Interactive, editable schema experience
 
-- Phase 4 - SQL Generation & RLS (~1.5 hrs)
-  - Build deterministic SQL/RLS generation from schema JSON; ensure idempotence.
-  - Surface SQL preview in UI with copy/download options; test with multiple sample prompts.
-  - Deliverable: reliable SQL + optional RLS output flowing through the app.
+- Phase 4 - SQL Generation & RLS (~1 hour)
+  - RLS Policy Generation:
+    - Detect user_id columns
+    - Generate Row Level Security policies
+    - Add auth.uid() checks for Supabase
+  - Enhanced SQL Export:
+    - Add migration timestamps
+    - Generate separate RLS file
+    - Export schema JSON artifact
+  - Deliverable: Production-ready SQL with security policies
 
 - Phase 5 - Supabase Integration (~2 hrs)
-  - Create credential modal to capture Supabase URL/service key (transient storage).
-  - Backend applies SQL/RLS via `supabase-js`; add export endpoints for JSON/SQL/ERD assets.
-  - Deliverable: end-to-end apply to Supabase project plus artifact downloads.
+  - Supabase Connection Modal (45 mins):
+    - Create credential capture UI (URL + service key)
+    - Validate connection
+    - Store credentials securely (in-memory only)
+  - Apply to Supabase (1 hour):
+    - Backend endpoint: POST /api/supabase/apply
+    - Use @supabase/supabase-js to execute SQL
+    - Add progress indicators and error handling
+  - Export Features (15 mins):
+    - GET /api/export/schema (JSON download)
+    - GET /api/export/sql (SQL file download)
+    - GET /api/export/erd (SVG diagram)
+  - Deliverable: One-click apply to live Supabase project
 
 - Phase 6 - Polish & Demo Prep (~1 hr)
-  - Harden error handling, loading states, and success toasts.
-  - Document run steps, env vars, and craft demo script with reset plan (`supabase db reset`).
-  - Deliverable: demo-ready app with clear instructions and fallback plan.
+  - Error Handling & UX (30 mins):
+    - Add toast notifications
+    - Implement loading skeletons
+    - Add error boundaries
+    - Input validation with helpful messages
+  - Demo Preparation (30 mins):
+    - Create demo script with 3-4 example prompts
+    - Test reset flow (supabase db reset)
+    - Write README with setup instructions
+    - Prepare backup screenshots/video
+  - Deliverable: Demo-ready app with polished UX
