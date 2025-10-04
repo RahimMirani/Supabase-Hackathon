@@ -1,20 +1,11 @@
-import { useState } from 'react'
-import './App.css'
+import { AppLayout } from './components/layout'
+import { StoreProvider } from './state'
 
-function App() {
-  const [count, useCount] = useState(2)
-
-  const handleClick = () => {
-    useCount(count + 1)
-  }
-
+const App = () => {
   return (
-    <div>
-      <h1 className="text-3xl font-bold underline">Hello World</h1>
-      <button onClick={handleClick}>
-        {count}
-      </button>
-    </div>
+    <StoreProvider>
+      <AppLayout sidebar={<div>Chat Sidebar</div>} main={<div>Stepper Area</div>} />
+    </StoreProvider>
   )
 }
 

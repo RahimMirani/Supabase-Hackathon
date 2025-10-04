@@ -10,7 +10,7 @@ type Store = AppState & AppActions
 
 const createAppStore = () =>
   createStore<Store>()(
-    devtools((set, get) => ({
+    devtools((set) => ({
       ...buildInitialState(),
       reset: () => set(buildInitialState()),
       setActiveStep: (step: StepKey) =>
