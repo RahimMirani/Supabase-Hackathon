@@ -88,6 +88,17 @@ export const SupabaseModal = ({ isOpen, onClose, onConnect, onApplyNow }: Supaba
     }
   }
 
+  const handleCopySetupSql = async () => {
+    const setupSql = `CREATE OR REPLACE FUNCTION exec_sql(query text)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER
+AS $$ BEGIN EXECUTE query; END; $$;
+
+GRANT EXECUTE ON FUNCTION exec_sql(text) TO service_role;`
+    
+    await navigator.clipboard.writeText(setupSql)
+    alert('✓ Setup SQL copied! Paste it into your Supabase SQL Editor and run it.')
+  }
+
   const handleClose = () => {
     if (!isConnecting && !isApplying) {
       setUrl('')
@@ -181,17 +192,49 @@ export const SupabaseModal = ({ isOpen, onClose, onConnect, onApplyNow }: Supaba
               </div>
 
               <div className="success-instructions">
-                <h3>Next Steps:</h3>
-                <ol>
-                  <li>Click "Copy SQL" below</li>
-                  <li>Open your Supabase SQL Editor</li>
-                  <li>Paste and run the SQL</li>
-                  <li>Your tables will be created! 🚀</li>
-                </ol>
+                <h3>Choose How to Apply:</h3>
+                
+                <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(62, 207, 142, 0.1)', borderRadius: '8px', border: '1px solid rgba(62, 207, 142, 0.3)' }}>
+                  <h4 style={{ color: '#3ECF8E', marginTop: 0, marginBottom: '0.5rem' }}>Option 1: Auto-Apply (One Click) ⚡</h4>
+                  <p style={{ margin: '0.5rem 0', fontSize: '0.9rem' }}>
+                    <strong>First-time setup required:</strong> Run this SQL once in your Supabase SQL Editor:
+                  </p>
+                  <pre style={{ 
+                    background: '#1a1a1a', 
+                    padding: '0.75rem', 
+                    borderRadius: '4px', 
+                    fontSize: '0.85rem',
+                    overflow: 'auto',
+                    border: '1px solid #333'
+                  }}>
+{`CREATE OR REPLACE FUNCTION exec_sql(query text)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER
+AS $$ BEGIN EXECUTE query; END; $$;
+
+GRANT EXECUTE ON FUNCTION exec_sql(text) TO service_role;`}
+                  </pre>
+                  <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem', color: '#888' }}>
+                    ✓ After running this once, click "Apply Now" to auto-create tables
+                  </p>
+                </div>
+
+                <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
+                  <h4 style={{ color: '#fff', marginTop: 0, marginBottom: '0.5rem' }}>Option 2: Manual Copy & Paste 📋</h4>
+                  <ol style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
+                    <li>Click "Copy SQL" below</li>
+                    <li>Open your Supabase SQL Editor</li>
+                    <li>Paste and run the SQL</li>
+                  </ol>
+                </div>
               </div>
 
               <div className="success-sql-preview">
-                <pre>{successData.sql.substring(0, 300)}...</pre>
+                <details>
+                  <summary style={{ cursor: 'pointer', color: '#3ECF8E', marginBottom: '0.5rem' }}>
+                    Preview SQL ({successData.sql.length} characters)
+                  </summary>
+                  <pre style={{ maxHeight: '200px', overflow: 'auto' }}>{successData.sql}</pre>
+                </details>
               </div>
             </div>
           </div>
@@ -200,8 +243,11 @@ export const SupabaseModal = ({ isOpen, onClose, onConnect, onApplyNow }: Supaba
             <button className="btn btn--ghost" onClick={handleClose} type="button" disabled={isApplying}>
               Cancel
             </button>
+            <button className="btn btn--ghost" onClick={handleCopySetupSql} type="button" disabled={isApplying}>
+              ⚡ Copy Setup SQL
+            </button>
             <button className="btn btn--ghost" onClick={handleCopySql} type="button" disabled={isApplying}>
-              📋 Copy SQL
+              📋 Copy Schema SQL
             </button>
             <button className="btn" onClick={handleApplyNow} type="button" disabled={isApplying}>
               {isApplying ? '🔄 Creating Tables...' : '🚀 Apply Now (Auto-Create)'}
