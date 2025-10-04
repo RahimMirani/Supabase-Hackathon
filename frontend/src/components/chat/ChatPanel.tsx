@@ -76,9 +76,10 @@ export const ChatPanel = () => {
   return (
     <div className="chat-panel">
       <header className="chat-panel__header">
-        <div>
-          <p className="chat-panel__title">Schema Assistant</p>
-          <p className="chat-panel__subtitle">Explain your idea to generate a schema blueprint.</p>
+        <div className="chat-panel__header-meta">
+          <div className="chat-panel__badge">Chat</div>
+          <p className="chat-panel__title">ERD Chat Assistant</p>
+          <p className="chat-panel__subtitle">Describe your app to generate a database schema</p>
         </div>
       </header>
 
