@@ -111,11 +111,11 @@ type StoreProviderProps = {
 }
 
 export const StoreProvider = ({ children }: StoreProviderProps) => {
-  const storeRef = useRef<ReturnType<typeof createAppStore>>()
+  const storeRef = useRef<ReturnType<typeof createAppStore> | undefined>(undefined)
   if (!storeRef.current) {
     storeRef.current = createAppStore()
   }
-  return <StoreContext.Provider value={storeRef.current}>{children}</StoreContext.Provider>
+  return <StoreContext.Provider value={storeRef.current!}>{children}</StoreContext.Provider>
 }
 
 export const useStore = <T,>(selector: (state: Store) => T): T => {
