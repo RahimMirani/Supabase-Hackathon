@@ -15,22 +15,27 @@ function extractTableNames(sql: string): string[] {
   const statements = sql
     .split(';')
     .map((s) => s.trim())
-    .filter((s) => s.length > 0 && !s.startsWith('--'))
+    .filter((s) => s.length > 0) // Don't filter out comments - they might contain CREATE TABLE
 
   console.log(`Found ${statements.length} statements`)
 
   const tablesCreated: string[] = []
 
-  for (const statement of statements) {
+  for (let i = 0; i < statements.length; i++) {
+    const statement = statements[i]
     const lowerStatement = statement.toLowerCase()
+    
     if (lowerStatement.includes('create table')) {
-      // More flexible regex to catch various formats
+      console.log(`\n✓ Found CREATE TABLE in statement ${i + 1}`)
+      console.log('First 200 chars:', statement.substring(0, 200))
+      
+      // Extract table name - handle multiline with comments
       const match = statement.match(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-zA-Z_][a-zA-Z0-9_]*)/i)
       if (match && match[1]) {
-        console.log(`Found table: ${match[1]}`)
+        console.log(`✓ Extracted table name: ${match[1]}`)
         tablesCreated.push(match[1])
       } else {
-        console.log('Could not extract table name from:', statement.substring(0, 100))
+        console.log(`✗ Could not extract table name with regex`)
       }
     }
   }
@@ -122,7 +127,7 @@ router.post('/apply', async (req: Request, res: Response) => {
     const statements = sql
       .split(';')
       .map((s: string) => s.trim())
-      .filter((s: string) => s.length > 0 && !s.startsWith('--'))
+      .filter((s: string) => s.length > 0) // Keep all statements including those with comments
 
     const tablesCreated: string[] = []
     let successCount = 0
