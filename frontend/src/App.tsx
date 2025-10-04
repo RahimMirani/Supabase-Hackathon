@@ -18,13 +18,22 @@ const AppContent = () => {
     patchUiState({ showSupabaseModal: false })
   }
 
+  const handleConnectSupabase = () => {
+    // TODO: Implement Supabase connection modal
+    alert('Supabase connection coming soon!')
+  }
+
   return (
     <>
       <AppLayout
         sidebar={<ChatPanel />}
         main={
           schema ? (
-            <SchemaView schema={schema} onViewSql={handleViewSql} />
+            <SchemaView 
+              schema={schema} 
+              onViewSql={handleViewSql}
+              onConnectSupabase={handleConnectSupabase}
+            />
           ) : (
             <div className="workspace-placeholder">No schema generated yet</div>
           )

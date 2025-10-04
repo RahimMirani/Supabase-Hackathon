@@ -5,9 +5,10 @@ import type { SchemaData } from '../../state/types'
 type SchemaViewProps = {
   schema: SchemaData
   onViewSql?: () => void
+  onConnectSupabase?: () => void
 }
 
-export const SchemaView = ({ schema, onViewSql }: SchemaViewProps) => {
+export const SchemaView = ({ schema, onViewSql, onConnectSupabase }: SchemaViewProps) => {
   const [activeTab, setActiveTab] = useState<'diagram' | 'tables'>('diagram')
 
   return (
@@ -20,9 +21,14 @@ export const SchemaView = ({ schema, onViewSql }: SchemaViewProps) => {
             {schema.relations.length} {schema.relations.length === 1 ? 'relation' : 'relations'}
           </p>
         </div>
-        <button className="btn" onClick={onViewSql} type="button">
-          View SQL
-        </button>
+        <div className="schema-view__actions">
+          <button className="btn btn--ghost" onClick={onViewSql} type="button">
+            View SQL
+          </button>
+          <button className="btn" onClick={onConnectSupabase} type="button">
+            Connect to Supabase
+          </button>
+        </div>
       </header>
 
       <div className="schema-view__tabs">
