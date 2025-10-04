@@ -88,6 +88,8 @@ export type UiState = {
   theme: 'light' | 'dark' | 'system'
   isChatCollapsed: boolean
   showSupabaseModal: boolean
+  showSqlModal: boolean
+  showSupabaseConnectModal: boolean
 }
 
 export type AppState = {

@@ -213,6 +213,8 @@ export const buildInitialState = (): AppState => ({
     theme: 'system',
     isChatCollapsed: false,
     showSupabaseModal: false,
+    showSqlModal: false,
+    showSupabaseConnectModal: false,
   },
   error: null,
 })

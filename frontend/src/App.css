@@ -554,6 +554,89 @@
   border-top: 1px solid #2a2a2a;
 }
 
+.modal-content--supabase {
+  max-width: 600px;
+}
+
+.supabase-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ededed;
+}
+
+.form-input {
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #3a3a3a;
+  background: #2a2a2a;
+  color: #ededed;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3ECF8E;
+  box-shadow: 0 0 0 1px rgba(62, 207, 142, 0.25);
+}
+
+.form-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-help {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #8b8b8b;
+}
+
+.form-warning {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 8px;
+}
+
+.form-warning__icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.form-warning__content {
+  font-size: 0.85rem;
+  color: #ededed;
+  line-height: 1.5;
+}
+
+.form-warning__content strong {
+  color: #fbbf24;
+}
+
+.form-error {
+  padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 960px) {
   .app-shell__body {
     grid-template-columns: 1fr;

@@ -2,6 +2,7 @@ import express, { Express, Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import schemaRouter from './routes/schema'
+import supabaseRouter from './routes/supabase'
 
 // Load environment variables
 dotenv.config()
@@ -25,6 +26,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 // Routes
 app.use('/api/schema', schemaRouter)
+app.use('/api/supabase', supabaseRouter)
 
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
