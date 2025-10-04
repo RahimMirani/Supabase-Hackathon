@@ -20,21 +20,22 @@ const convertSchemaToMermaid = (schema: SchemaData): string => {
   // Add tables with their columns
   schema.tables.forEach((table) => {
     const columns = table.columns.map((col) => {
-      let type = col.type
       let constraints = []
       
       if (col.isPrimaryKey) constraints.push('PK')
       if (col.isForeignKey) constraints.push('FK')
       if (col.isUnique) constraints.push('UNIQUE')
-      if (!col.isNullable) constraints.push('NOT NULL')
       
-      const constraintStr = constraints.length > 0 ? ` "${constraints.join(', ')}"` : ''
-      return `    ${type} ${col.name}${constraintStr}`
+      const constraintStr = constraints.length > 0 ? ` "${constraints.join(',')}"` : ''
+      // Sanitize type name by replacing spaces with underscores
+      const sanitizedType = col.type.replace(/\s+/g, '_')
+      // Mermaid format: type columnName "constraint"
+      return `        ${sanitizedType} ${col.name}${constraintStr}`
     })
 
-    lines.push(`  ${table.name} {`)
+    lines.push(`    ${table.name} {`)
     lines.push(...columns)
-    lines.push('  }')
+    lines.push(`    }`)
   })
 
   // Add relations
@@ -46,10 +47,11 @@ const convertSchemaToMermaid = (schema: SchemaData): string => {
       let relationSymbol = '||--o{'
       if (rel.relationship === 'one-to-one') relationSymbol = '||--||'
       if (rel.relationship === 'one-to-many') relationSymbol = '||--o{'
+      if (rel.relationship === 'many-to-one') relationSymbol = '}o--||'
       if (rel.relationship === 'many-to-many') relationSymbol = '}o--o{'
 
-      const label = rel.description || ''
-      lines.push(`  ${fromTable.name} ${relationSymbol} ${toTable.name} : "${label}"`)
+      const label = rel.description || 'has'
+      lines.push(`    ${fromTable.name} ${relationSymbol} ${toTable.name} : "${label}"`)
     }
   })
 
@@ -65,12 +67,19 @@ export const MermaidERD = ({ schema }: MermaidERDProps) => {
       if (!containerRef.current) return
 
       try {
+        console.log('Rendering Mermaid diagram with code:', mermaidCode)
         const id = `mermaid-${Date.now()}`
         const { svg } = await mermaid.render(id, mermaidCode)
         containerRef.current.innerHTML = svg
       } catch (error) {
         console.error('Failed to render Mermaid diagram:', error)
-        containerRef.current.innerHTML = '<p style="color: #d93025;">Failed to render ERD</p>'
+        console.error('Mermaid code was:', mermaidCode)
+        containerRef.current.innerHTML = `
+          <div style="padding: 1rem; color: #d93025;">
+            <p><strong>Failed to render ERD</strong></p>
+            <p style="font-size: 0.85rem; margin-top: 0.5rem;">Check console for details</p>
+          </div>
+        `
       }
     }
 

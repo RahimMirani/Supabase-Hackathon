@@ -28,9 +28,6 @@ export const AppLayout = ({ header, footer, sidebar, main }: AppLayoutProps) => 
         <aside className="app-shell__sidebar">{sidebar}</aside>
         <main className="app-shell__main">{main}</main>
       </div>
-      <footer className="app-shell__footer">
-        {footer ?? <span>Hackathon prototype · Phase 1</span>}
-      </footer>
     </div>
   )
 }
