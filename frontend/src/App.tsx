@@ -38,11 +38,15 @@ const AppContent = () => {
     // Generate SQL from schema
     const sql = generateSqlFromSchema(schema)
 
-    // Apply to Supabase
+    // Apply to Supabase (verifies connection and returns SQL)
     const result = await applyToSupabase(credentials.url, credentials.serviceKey, sql)
 
-    // Show success message
-    alert(result.message)
+    // Return data for success modal
+    return {
+      sql,
+      tablesCreated: schema.tables.map((t) => t.name),
+      instructions: result.message,
+    }
   }
 
   return (
