@@ -1,10 +1,11 @@
 import { AppLayout } from './components/layout'
+import { ChatPanel } from './components/chat'
 import { StoreProvider } from './state'
 
 const App = () => {
   return (
     <StoreProvider>
-      <AppLayout sidebar={<div>Chat Sidebar</div>} main={<div>Stepper Area</div>} />
+      <AppLayout sidebar={<ChatPanel />} main={<div>Stepper Area</div>} />
     </StoreProvider>
   )
 }

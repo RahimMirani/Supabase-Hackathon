@@ -1,6 +1,7 @@
 import { createContext, useContext, useRef } from 'react'
 import type { ReactNode } from 'react'
-import { createStore } from 'zustand'
+import { createStore, useStore as useZustandStore } from 'zustand'
+import type { StoreApi } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
 import { buildInitialState } from './mocks'
@@ -103,7 +104,7 @@ const createAppStore = () =>
     }), { name: 'app-store' }),
   )
 
-const StoreContext = createContext<ReturnType<typeof createAppStore> | null>(null)
+const StoreContext = createContext<StoreApi<Store> | null>(null)
 
 type StoreProviderProps = {
   children: ReactNode
@@ -122,7 +123,7 @@ export const useStore = <T,>(selector: (state: Store) => T): T => {
   if (!store) {
     throw new Error('useStore must be used within a StoreProvider')
   }
-  return store(selector)
+  return useZustandStore(store, selector)
 }
 
 export const useStoreApi = () => {
