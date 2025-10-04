@@ -13,7 +13,6 @@ Steps:
 
 - Phase 1 - Frontend First (~2 hrs)
   - Scaffold Vite UI, add global state, ensure layout works with placeholder data.
-  - Build stepper flow (Prompt → Schema → SQL → Apply) with mocked responses.
   - Deliverable: fully wired frontend experience using mock data, ready for real APIs.
 
 - Phase 2 - Backend API & LLM (~2.5 hrs)
