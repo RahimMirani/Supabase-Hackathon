@@ -51,7 +51,7 @@ export type SchemaRelation = {
   toTableId: string
   fromColumnId: string
   toColumnId: string
-  relationship: 'one-to-one' | 'one-to-many' | 'many-to-many'
+  relationship: 'one-to-one' | 'one-to-many' | 'many-to-one' | 'many-to-many'
   description?: string | null
 }
 
