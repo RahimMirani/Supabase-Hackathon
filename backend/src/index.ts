@@ -13,6 +13,8 @@ const PORT = process.env.PORT || 3001
 // Middleware
 const allowedOrigins = [
   'http://localhost:5173',
+  'https://erddiagram.chat',
+  'https://www.erddiagram.chat',
   process.env.FRONTEND_URL,
   process.env.FRONTEND_URL_WWW,
 ].filter(Boolean) as string[]
