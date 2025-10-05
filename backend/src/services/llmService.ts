@@ -133,7 +133,7 @@ export async function generateSchemaFromPrompt(prompt: string): Promise<SchemaDa
   try {
     const openai = getOpenAIClient()
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-5-mini-2025-08-07',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: `Generate a database schema for: ${prompt}` },
