@@ -3,10 +3,12 @@
 > 🏆 Built for the Supabase Hackathon
 
 Transform natural language descriptions into production-ready database schemas in seconds. Describe your app, get an interactive ERD, and deploy tables to Supabase with one click.
-<img width="947" height="448" alt="1 1" src="https://github.com/user-attachments/assets/095a732d-04ea-45d4-a530-155a63cdb8d5" />
-
-
 🔗 Check it out at: [erddiagram.chat](https://erddiagram.chat)
+
+<img width="947" height="448" alt="1 1" src="https://github.com/user-attachments/assets/095a732d-04ea-45d4-a530-155a63cdb8d5" />
+<img width="944" height="439" alt="1 2" src="https://github.com/user-attachments/assets/72e9aeb2-b36c-4dbd-86c2-0ada7cb1a966" />
+
+
 
 ![ERD Generator](https://img.shields.io/badge/Supabase-Hackathon-3ECF8E?style=for-the-badge&logo=supabase)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
