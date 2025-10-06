@@ -134,27 +134,6 @@ FRONTEND_URL=http://localhost:5173
 The frontend automatically uses `http://localhost:3001` for development.
 
 For production, set `VITE_API_URL` to your backend URL.
-
----
-
-## 📦 Deployment
-
-### Deploy to Render
-
-**Backend:**
-1. Create new Web Service
-2. Root Directory: `backend`
-3. Build Command: `npm install && npm run build`
-4. Start Command: `npm start`
-5. Add environment variables: `NODE_ENV`, `OPENAI_API_KEY`
-
-**Frontend:**
-1. Create new Static Site
-2. Root Directory: `frontend`
-3. Build Command: `npm install && npm run build`
-4. Publish Directory: `dist`
-5. Add environment variable: `VITE_API_URL=https://your-backend.onrender.com`
-
 ---
 
 ## 🎮 Usage Guide
@@ -212,22 +191,6 @@ GRANT EXECUTE ON FUNCTION exec_sql(text) TO service_role;
 Schema       Direct SQL
 Generation   Execution
 ```
-
----
-
-## 🌟 Key Features for Supabase Hackathon
-
-1. **Supabase-First Design**: Built specifically for Supabase + PostgreSQL
-2. **Production-Ready Schemas**: Follows Supabase best practices
-3. **Direct Integration**: One-click table creation in Supabase
-4. **Developer Experience**: Intuitive UI with Supabase branding
-5. **Time Saver**: Reduces schema design from hours to seconds
-
----
-
-## 🤝 Contributing
-
-This project was built for the Supabase Hackathon. Contributions, issues, and feature requests are welcome!
 
 ---
 
