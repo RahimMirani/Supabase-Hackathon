@@ -4,7 +4,8 @@
 
 Transform natural language descriptions into production-ready database schemas in seconds. Describe your app, get an interactive ERD, and deploy tables to Supabase with one click.
 
-🔗 **Live Demo**: [erddiagram.chat](https://erddiagram.chat)
+
+🔗 Check it out at: [erddiagram.chat](https://erddiagram.chat)
 
 ![ERD Generator](https://img.shields.io/badge/Supabase-Hackathon-3ECF8E?style=for-the-badge&logo=supabase)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
